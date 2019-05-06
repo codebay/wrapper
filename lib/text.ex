@@ -44,6 +44,14 @@ defmodule Text do
     {new_lines ++ lines, remaining_length}
   end
 
+  defp append_word_to_current_line({word, length}, {[line | tail], remaining_length}) do
+    {[Enum.join([line, word], " ") | tail], remaining_length - length}
+  end
+
+  defp add_word_to_new_line({word, length}, lines, max_length) do
+    {[word | lines], max_length - length - 1}
+  end
+
   defp split_word(word, max_length) do
     word
     |> slice_word_into_blocks(max_length)
@@ -56,14 +64,6 @@ defmodule Text do
     |> Enum.chunk_every(max_length)
     |> Enum.map(&Enum.join/1)
     |> Enum.join(" ")
-  end
-
-  defp add_word_to_new_line({word, length}, lines, max_length) do
-    {[word | lines], max_length - length - 1}
-  end
-
-  defp append_word_to_current_line({word, length}, {[line | tail], remaining_length}) do
-    {[Enum.join([line, word], " ") | tail], remaining_length - length}
   end
 
 end
