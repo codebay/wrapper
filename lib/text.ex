@@ -17,51 +17,60 @@ defmodule Text do
       want to
       check"
   """
-  def line_wrap(line, max_length) do
-    line_wrap2(line, max_length)
+  def line_wrap(line, max_line_length) do
+    line_wrap2(line, max_line_length)
     |> elem(0)
     |> Enum.reverse()
     |> Enum.join("\n")
   end
 
-  defp line_wrap2(line, max_length) do
-    String.split(line)
-    |> Enum.map(fn x ->  {x, String.length(x)} end)
-    |> Enum.reduce({[], 0}, fn {word, length} = w, {lines, remaining_length} = l ->
+  defp line_wrap2(line, max_line_length) do
+    line
+    |> String.split()
+    |> size_of_each_word()
+    |> split_line_into_multiple_lines(max_line_length)
+  end
+
+  defp size_of_each_word(word_list) do
+    Enum.map(word_list, fn x ->  {x, String.length(x)} end)
+  end
+
+  defp split_line_into_multiple_lines(line, max_line_length) do
+    Enum.reduce(line, {[], 0}, fn {word, word_length} = w, {lines, remaining_length} = l ->
       cond do
-        length > max_length ->
-          split_and_append_long_word(word, lines, max_length)
-        length <= remaining_length ->
+        word_length > max_line_length ->
+          split_and_append_long_word(word, lines, max_line_length)
+        word_length <= remaining_length ->
           append_word_to_current_line(w, l)
         true ->
-          add_word_to_new_line(w, lines, max_length)
+          add_word_to_new_line(w, lines, max_line_length)
       end
     end)
   end
 
-  defp split_and_append_long_word(word, lines, max_length) do
-    {new_lines, remaining_length} = split_word(word, max_length)
-    {new_lines ++ lines, remaining_length}
+  defp split_and_append_long_word(word, lines, max_line_length) do
+    {new_lines, remaining_line_length} = split_word(word, max_line_length)
+    {new_lines ++ lines, remaining_line_length}
   end
 
-  defp append_word_to_current_line({word, length}, {[line | tail], remaining_length}) do
-    {[Enum.join([line, word], " ") | tail], remaining_length - length}
+  defp append_word_to_current_line({word, word_length}, {[line | tail], remaining_line_length}) do
+    {[Enum.join([line, word], " ") | tail], remaining_line_length - word_length}
   end
 
-  defp add_word_to_new_line({word, length}, lines, max_length) do
-    {[word | lines], max_length - length - 1}
+  defp add_word_to_new_line({word, word_length}, lines, max_line_length) do
+    {[word | lines], max_line_length - word_length - 1}
   end
 
-  defp split_word(word, max_length) do
+  defp split_word(word, max_line_length) do
     word
-    |> slice_word_into_blocks(max_length)
-    |> line_wrap2(max_length)
+    |> slice_word_into_multiple_lines(max_line_length)
+    |> line_wrap2(max_line_length)
   end
 
-  defp slice_word_into_blocks(word, max_length) do
+  defp slice_word_into_multiple_lines(word, max_line_length) do
     word
     |> String.codepoints
-    |> Enum.chunk_every(max_length)
+    |> Enum.chunk_every(max_line_length)
     |> Enum.map(&Enum.join/1)
     |> Enum.join(" ")
   end
