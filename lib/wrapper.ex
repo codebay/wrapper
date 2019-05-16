@@ -1,4 +1,4 @@
-defmodule Text do
+defmodule Wrapper do
   @moduledoc """
   Text Module
   """
@@ -9,7 +9,7 @@ defmodule Text do
   Words may be broken apart only if they are longer than the specified length.
 
   ##Example
-      iex> Text.line_wrap("However, in many circumstances, we want to check", 10)
+      iex> Wrapper.wrap("However, in many circumstances, we want to check", 10)
       "However,
       in many
       circumstan
@@ -17,7 +17,7 @@ defmodule Text do
       want to
       check"
   """
-  def line_wrap(line, max_line_length) do
+  def wrap(line, max_line_length) do
     line_wrap2(line, max_line_length)
     |> elem(0)
     |> Enum.reverse()
