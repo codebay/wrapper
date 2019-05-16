@@ -18,13 +18,13 @@ defmodule Wrapper do
       check"
   """
   def wrap(line, max_line_length) do
-    line_wrap2(line, max_line_length)
+    assemble(line, max_line_length)
     |> elem(0)
     |> Enum.reverse()
     |> Enum.join("\n")
   end
 
-  defp line_wrap2(line, max_line_length) do
+  defp assemble(line, max_line_length) do
     line
     |> String.split()
     |> size_of_each_word()
@@ -64,7 +64,7 @@ defmodule Wrapper do
   defp split_word(word, max_line_length) do
     word
     |> slice_word_into_multiple_lines(max_line_length)
-    |> line_wrap2(max_line_length)
+    |> assemble(max_line_length)
   end
 
   defp slice_word_into_multiple_lines(word, max_line_length) do
