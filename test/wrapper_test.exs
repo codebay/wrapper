@@ -25,5 +25,4 @@ defmodule WrapperTest do
   test "two words are split max length 2" do
     assert Wrapper.wrap("x y", 2) == "x\ny"
   end
-
 end

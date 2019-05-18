@@ -17,7 +17,7 @@ defmodule Wrapper do
       want to
       check"
   """
-  def wrap(line, max_line_length) do
+  def wrap(line, max_line_length) when is_binary(line) do
     assemble(line, max_line_length)
     |> elem(0)
     |> Enum.reverse()
@@ -74,5 +74,4 @@ defmodule Wrapper do
     |> Enum.map(&Enum.join/1)
     |> Enum.join(" ")
   end
-
 end
