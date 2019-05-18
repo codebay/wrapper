@@ -38,18 +38,16 @@ defmodule Wrapper2 do
 
   defp split_long_blocks(blocks, max_block_size) do
     blocks
-    |> Enum.map(fn {s, b} = x ->
-      if s > max_block_size do
-        split_block_every(b, max_block_size)
-      else
-        x
-      end
-    end)
+    |> Enum.map(&split_block_every(&1, max_block_size))
     |> List.flatten()
   end
 
-  defp split_block_every(block, nth) do
+  defp split_block_every({size, _word} = block, nth) when size <= nth do
     block
+  end
+
+  defp split_block_every({_size, word}, nth) do
+    word
     |> String.codepoints()
     |> Enum.chunk_every(nth)
     |> Enum.map(&Enum.join/1)
@@ -58,23 +56,17 @@ defmodule Wrapper2 do
 
   defp join_blocks_into_lines(blocks, nth) do
     blocks
-    |> Enum.reduce({0, []}, fn {size, _} = block, {remaining, _} = acc ->
-      if size <= remaining do
-        append_block_to_current_block(block, acc)
-      else
-        add_block_to_new_line(block, acc, nth)
-      end
-    end)
+    |> Enum.reduce({0, [], nth}, fn(x, acc) -> assemble_block(x, acc) end)
     |> elem(1)
     |> Enum.reverse()
     |> Enum.join("\n")
   end
 
-  defp append_block_to_current_block({size, block}, {remaining, [line | tail]}) do
-    {remaining - size, [line <> " " <> block | tail]}
+  defp assemble_block({size, word}, {remaining, [line | tail], nth}) when size <= remaining do
+    {remaining - size, [line <> " " <> word | tail], nth}
   end
 
-  defp add_block_to_new_line({size, block}, {_remaining, lines}, nth) do
-    {nth - size - 1, [block | lines]}
+  defp assemble_block({size, word}, {_remaining, lines, nth}) do
+    {nth - size - 1, [word | lines], nth}
   end
 end
