@@ -26,7 +26,6 @@ defmodule Wrapper2Test do
     assert Wrapper2.wrap("x y", 2) == "x\ny"
   end
 
-  @tag :wip
   test "three words" do
     assert Wrapper2.wrap("uv wx yz ", 5) == "uv wx\nyz"
   end
