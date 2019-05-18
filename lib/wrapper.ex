@@ -56,7 +56,7 @@ defmodule Wrapper do
 
   defp join_blocks_into_lines(blocks, nth) do
     blocks
-    |> Enum.reduce({0, [], nth}, fn(x, acc) -> assemble_block(x, acc) end)
+    |> Enum.reduce({0, [], nth}, &assemble_block/2)
     |> elem(1)
     |> Enum.reverse()
     |> Enum.join("\n")
