@@ -54,7 +54,7 @@ defmodule Wrapper do
   end
 
   defp append_word_to_current_line({word, word_length}, {[line | tail], remaining_line_length}) do
-    {[Enum.join([line, word], " ") | tail], remaining_line_length - word_length}
+    {[line <> " " <> word| tail], remaining_line_length - word_length}
   end
 
   defp add_word_to_new_line({word, word_length}, lines, max_line_length) do

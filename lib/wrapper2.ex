@@ -71,7 +71,7 @@ defmodule Wrapper2 do
   end
 
   defp append_block_to_current_block({size, block}, {remaining, [line | tail]}) do
-    {remaining - size, [Enum.join([line, block], " ") | tail]}
+    {remaining - size, [line <> " " <> block | tail]}
   end
 
   defp add_block_to_new_line({size, block}, {_remaining, lines}, nth) do
