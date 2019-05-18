@@ -1,6 +1,6 @@
 defmodule Wrapper do
   @moduledoc """
-  Text Module
+  Documentation for Wrapper.
   """
 
   @doc """
@@ -18,60 +18,55 @@ defmodule Wrapper do
       check"
   """
   def wrap(line, max_line_length) when is_binary(line) do
-    assemble(line, max_line_length)
-    |> elem(0)
+    line
+    |> split_into_blocks()
+    |> split_long_blocks(max_line_length)
+    |> join_blocks_into_lines(max_line_length)
+  end
+
+  defp split_into_blocks(line) do
+    line
+    |> String.split()
+    |> add_size_of_blocks()
+  end
+
+  defp add_size_of_blocks(blocks) do
+    blocks
+    |> Enum.map(&String.length/1)
+    |> Enum.zip(blocks)
+  end
+
+  defp split_long_blocks(blocks, max_block_size) do
+    blocks
+    |> Enum.map(&split_block_every(&1, max_block_size))
+    |> List.flatten()
+  end
+
+  defp split_block_every({size, _word} = block, nth) when size <= nth do
+    block
+  end
+
+  defp split_block_every({_size, word}, nth) do
+    word
+    |> String.codepoints()
+    |> Enum.chunk_every(nth)
+    |> Enum.map(&Enum.join/1)
+    |> add_size_of_blocks()
+  end
+
+  defp join_blocks_into_lines(blocks, nth) do
+    blocks
+    |> Enum.reduce({0, [], nth}, fn(x, acc) -> assemble_block(x, acc) end)
+    |> elem(1)
     |> Enum.reverse()
     |> Enum.join("\n")
   end
 
-  defp assemble(line, max_line_length) do
-    line
-    |> String.split()
-    |> size_of_each_word()
-    |> split_line_into_multiple_lines(max_line_length)
+  defp assemble_block({size, word}, {remaining, [line | tail], nth}) when size <= remaining do
+    {remaining - size, [line <> " " <> word | tail], nth}
   end
 
-  defp size_of_each_word(word_list) do
-    Enum.map(word_list, fn x ->  {x, String.length(x)} end)
-  end
-
-  defp split_line_into_multiple_lines(line, max_line_length) do
-    Enum.reduce(line, {[], 0}, fn {word, word_length} = w, {lines, remaining_length} = l ->
-      cond do
-        word_length > max_line_length ->
-          split_and_append_long_word(word, lines, max_line_length)
-        word_length <= remaining_length ->
-          append_word_to_current_line(w, l)
-        true ->
-          add_word_to_new_line(w, lines, max_line_length)
-      end
-    end)
-  end
-
-  defp split_and_append_long_word(word, lines, max_line_length) do
-    {new_lines, remaining_line_length} = split_word(word, max_line_length)
-    {new_lines ++ lines, remaining_line_length}
-  end
-
-  defp append_word_to_current_line({word, word_length}, {[line | tail], remaining_line_length}) do
-    {[line <> " " <> word| tail], remaining_line_length - word_length}
-  end
-
-  defp add_word_to_new_line({word, word_length}, lines, max_line_length) do
-    {[word | lines], max_line_length - word_length - 1}
-  end
-
-  defp split_word(word, max_line_length) do
-    word
-    |> slice_word_into_multiple_lines(max_line_length)
-    |> assemble(max_line_length)
-  end
-
-  defp slice_word_into_multiple_lines(word, max_line_length) do
-    word
-    |> String.codepoints
-    |> Enum.chunk_every(max_line_length)
-    |> Enum.map(&Enum.join/1)
-    |> Enum.join(" ")
+  defp assemble_block({size, word}, {_remaining, lines, nth}) do
+    {nth - size - 1, [word | lines], nth}
   end
 end
